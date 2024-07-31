@@ -16,19 +16,35 @@
 
 /* The programmatic setup of this keymap is heavily inspired by https://github.com/Adam13531/qmk_firmware. You'll find
  * many similar or copied functions. Thanks Adam!
+ *
+ * Custom one shot mods by Callum. https://github.com/callum-oakley/qmk_firmware/tree/master/users/callum
  */
 
 #include QMK_KEYBOARD_H
+
 #include <stdio.h>
+#include "oneshot.h"
 
 enum layers {
     _BASE,
-    _NUM,
     _SYM,
     _NAV,
-    _MEDIA,
-    _FUNC
+    _NUM,
 };
+
+enum keycodes {
+    // Custom oneshot mod implementation with no timers.
+    OS_SHFT = SAFE_RANGE,
+    OS_CTRL,
+    OS_ALT,
+    OS_CMD,
+};
+
+#define LA_SYM MO(_SYM)
+#define LA_NAV MO(_NAV)
+#define M_CUT G(KC_X)
+#define M_COPY G(KC_C)
+#define M_PSTE G(KC_V)
 
 // Home row mods ordering as discussed in https://precondition.github.io/home-row-mods#home-row-mods-order
 // CASG → COSC, Thus for left hand side: Ctrl - Option - Shift - Command.
@@ -36,47 +52,93 @@ enum layers {
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_BASE] = LAYOUT_split_3x6_3(
-        XXXXXXX, KC_Q,         KC_W,         KC_E,         KC_R,         KC_T,                  KC_Y, KC_U,         KC_I,         KC_O,         KC_P,            XXXXXXX,
-        XXXXXXX, LCTL_T(KC_A), LALT_T(KC_S), LSFT_T(KC_D), LGUI_T(KC_F), KC_G,                  KC_H, RGUI_T(KC_J), RSFT_T(KC_K), RALT_T(KC_L), RCTL_T(KC_SCLN), XXXXXXX,
-        XXXXXXX, KC_Z,         KC_X,         KC_C,         KC_V,         KC_B,                  KC_N, KC_M,         KC_COMM,      KC_DOT,       KC_SLSH,         XXXXXXX,
-                                   LT(_MEDIA, KC_ESC), LT(_NAV, KC_SPC), KC_TAB,                LT(_SYM, KC_ENT), LT(_NUM, KC_BSPC), LT(_FUNC, KC_DEL)
-    ),
-
-    [_NUM] = LAYOUT_split_3x6_3(
-        XXXXXXX, XXXXXXX, KC_7,    KC_8,    KC_9,    S(KC_EQL),                     XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, XXXXXXX, KC_4,    KC_5,    KC_6,    KC_EQL ,                       XXXXXXX,  KC_LGUI,  KC_LSFT, KC_LALT, KC_LCTL, XXXXXXX,
-        XXXXXXX, XXXXXXX, KC_1,    KC_2,    KC_3,    KC_MINS,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-                                   XXXXXXX, KC_0,    XXXXXXX,                       XXXXXXX,  XXXXXXX,  XXXXXXX
+        XXXXXXX, KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,              KC_Y, KC_U,     KC_I,     KC_O,     KC_P,     XXXXXXX,
+        XXXXXXX, KC_A,     KC_S,     KC_D,     KC_F,     KC_G,              KC_H, KC_J,     KC_K,     KC_L,     KC_SCLN,  XXXXXXX,
+        XXXXXXX, KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,              KC_N, KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,  XXXXXXX,
+                                     KC_LSFT,    LA_NAV,    KC_SPC,       KC_BSPC,    LA_SYM,    KC_ENT
     ),
 
     [_SYM] = LAYOUT_split_3x6_3(
-        XXXXXXX, S(KC_1), S(KC_2), S(KC_3), S(KC_4), S(KC_5),                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, KC_NUBS, S(KC_8), S(KC_9), S(KC_0), KC_QUOT,                       XXXXXXX,  KC_LGUI,  KC_LSFT, KC_LALT, KC_LCTL, XXXXXXX,
-        XXXXXXX, S(KC_6), S(KC_7), KC_LBRC, KC_RBRC, KC_GRV ,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-                                   XXXXXXX, XXXXXXX, XXXXXXX,                       XXXXXXX,  XXXXXXX,  XXXXXXX
+        XXXXXXX, KC_TILD, KC_AT,   KC_LCBR, KC_RCBR, KC_GRV ,               KC_CIRC,  KC_EQL,   KC_PLUS, KC_MINS, KC_UNDS, XXXXXXX,
+        XXXXXXX, KC_ESC,  KC_ASTR, KC_LPRN, KC_RPRN, KC_QUOT,               KC_PIPE,  OS_CMD,   OS_SHFT, OS_ALT,  OS_CTRL, XXXXXXX,
+        XXXXXXX, XXXXXXX, XXXXXXX, KC_LBRC, KC_RBRC, XXXXXXX,               KC_HASH,  KC_BSLS,  KC_AMPR, KC_QUES, KC_EXLM, XXXXXXX,
+                                   _______, _______, _______,               _______,  _______,  _______
     ),
 
     [_NAV] = LAYOUT_split_3x6_3(
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       KC_AGIN,  KC_PSTE,  KC_COPY, KC_CUT , KC_UNDO , XXXXXXX,
-        XXXXXXX, KC_LCTL, KC_LALT, KC_LSFT, KC_LGUI, XXXXXXX,                       KC_CAPS,  KC_LEFT,  KC_DOWN, KC_UP  , KC_RIGHT, XXXXXXX,
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       XXXXXXX,  KC_HOME,  KC_PGDN, KC_PGUP, KC_END  , XXXXXXX,
-                                   XXXXXXX, XXXXXXX, XXXXXXX,                       KC_ENT,   KC_BSPC,  KC_DEL
+        XXXXXXX, KC_MPRV, KC_VOLD, KC_VOLU, KC_MNXT, KC_KB_MUTE,            KC_PSCR,  M_PSTE,   M_COPY,  M_CUT,   XXXXXXX , XXXXXXX,
+        XXXXXXX, OS_CTRL, OS_ALT,  OS_SHFT, OS_CMD,  KC_MPLY,               KC_TAB,   KC_LEFT,  KC_DOWN, KC_UP  , KC_RIGHT, XXXXXXX,
+        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, KC_MSTP,               KC_CAPS,  KC_HOME,  KC_PGDN, KC_PGUP, KC_END  , XXXXXXX,
+                                   _______, _______, _______,               _______,  _______,  _______
     ),
 
-    [_MEDIA] = LAYOUT_split_3x6_3(
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       XXXXXXX,  KC_MPRV,  KC_VOLD, KC_VOLU, KC_MNXT, XXXXXXX,
-        XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-                                   XXXXXXX, XXXXXXX, XXXXXXX,                       KC_MSTP,  KC_MPLY,  KC_KB_MUTE
-    ),
-
-    [_FUNC] = LAYOUT_split_3x6_3(
-        XXXXXXX, KC_F12, KC_F7,   KC_F8,   KC_F9,   KC_PSCR,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, KC_F11, KC_F4,   KC_F5,   KC_F6,   XXXXXXX,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-        XXXXXXX, KC_F10, KC_F1,   KC_F2,   KC_F3,   XXXXXXX,                       XXXXXXX,  XXXXXXX,  XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
-                                  KC_ESC,  KC_SPC,  KC_TAB,                        XXXXXXX,  XXXXXXX,  XXXXXXX
+    [_NUM] = LAYOUT_split_3x6_3(
+        XXXXXXX, KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                  KC_6,     KC_7,     KC_8,    KC_9,    KC_0,     XXXXXXX,
+        XXXXXXX, OS_CTRL, OS_ALT,  OS_SHFT, OS_CMD,  KC_F11,                KC_F12,   OS_CMD,   OS_SHFT, OS_ALT,  OS_CTRL,  XXXXXXX,
+        XXXXXXX, KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,                 KC_F6,    KC_F7,    KC_F8,   KC_F9,   KC_F10,   XXXXXXX,
+                                   _______, _______, _______,               _______,  _______,  _______
     ),
 };
+    // Diagram of per-key LEDs on the RH side when viewed from above:
+    //   46  47  48  49  50  51
+    //   41  42  43  44  45  52
+    //   36  37  38  39  40  53
+    //  33  34  35
+
+bool is_oneshot_cancel_key(uint16_t keycode) {
+    switch (keycode) {
+    case LA_SYM:
+    case LA_NAV:
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool is_oneshot_ignored_key(uint16_t keycode) {
+    switch (keycode) {
+    case LA_SYM:
+    case LA_NAV:
+    case KC_LSFT:
+    case OS_SHFT:
+    case OS_CTRL:
+    case OS_ALT:
+    case OS_CMD:
+        return true;
+    default:
+        return false;
+    }
+}
+
+oneshot_state os_shft_state = os_up_unqueued;
+oneshot_state os_ctrl_state = os_up_unqueued;
+oneshot_state os_alt_state = os_up_unqueued;
+oneshot_state os_cmd_state = os_up_unqueued;
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    update_oneshot(
+        &os_shft_state, KC_LSFT, OS_SHFT,
+        keycode, record
+    );
+    update_oneshot(
+        &os_ctrl_state, KC_LCTL, OS_CTRL,
+        keycode, record
+    );
+    update_oneshot(
+        &os_alt_state, KC_LALT, OS_ALT,
+        keycode, record
+    );
+    update_oneshot(
+        &os_cmd_state, KC_LCMD, OS_CMD,
+        keycode, record
+    );
+
+    return true;
+}
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    return update_tri_layer_state(state, _SYM, _NAV, _NUM);
+}
 
 // The LEDs are so bright on the Corne, so we set the intensity pretty low.
 #define LED_INTENSITY 0x16
@@ -171,60 +233,56 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     set_color_for_contiguous_keycodes(0, 53, RGB_OFF);
 
+    if (host_keyboard_led_state().caps_lock) {
+        const uint8_t keycodes_unused[] = {24, 25, 26, 51, 52, 53};
+        set_all_keys_colors(keycodes_unused, sizeof(keycodes_unused) / sizeof(uint8_t), RGB_DARK_ORANGE);
+    }
+
     switch (get_highest_layer(layer_state)) {
-        case _BASE:
-            if (host_keyboard_led_state().caps_lock) {
-                set_color_for_contiguous_keycodes(0, 5, RGB_BRIGHT_ORANGE);
-                set_color_for_contiguous_keycodes(27, 32, RGB_BRIGHT_ORANGE);
-            }
-
-            light_up_left_mods_preset();
-            light_up_right_mods_preset();
-
+        case _BASE: {
             // LH thumbs as in 8, 7, 6
-            set_color_split(8, RGB_DARK_MAGENTA);  // LH thumb key 1
-            set_color_split(7, RGB_DARK_CYAN);  // LH thumb key 2
+            set_color_split(8, RGB_DARK_CYAN);  // LH thumb key 1
+            set_color_split(7, RGB_DARK_MAGENTA);  // LH thumb key 2
             // set_color_split(6, RGB_DARK_WHITE);  // LH thumb key 3
 
             // RH thumbs as in 33, 34, 35
-            set_color_split(33, RGB_DARK_GREEN);     // RH thumb key 1
+            // set_color_split(33, RGB_DARK_CYAN);     // RH thumb key 1
             set_color_split(34, RGB_DARK_BLUE);  // RH thumb key 2
-            set_color_split(35, RGB_DARK_RED);     // RH thumb key 3
+            // set_color_split(35, RGB_DARK_RED);     // RH thumb key 3
 
             break;
+        }
+        case _NUM: {
+            light_up_left_mods_preset();
+            light_up_right_mods_preset();
+
+            // Numbers
+            set_color_for_contiguous_keycodes(19, 23, RGB_DARK_GREEN);
+            set_color_for_contiguous_keycodes(46, 50, RGB_DARK_GREEN);
+
+            // Function keys
+            set_color_for_contiguous_keycodes(9, 13, RGB_DARK_ORANGE);
+            set_color_for_contiguous_keycodes(36, 40, RGB_DARK_ORANGE);
+            set_color_split(14, RGB_DARK_ORANGE);    // 'G' key
+            set_color_split(41, RGB_DARK_ORANGE);    // 'H' key
+
+            break;
+        }
         case _SYM: {
             light_up_right_mods_preset();
 
             // Highlight brackets
+            set_color_split(21, RGB_DARK_CYAN);    // 'E' key
+            set_color_split(20, RGB_DARK_CYAN);    // 'R' key
             set_color_split(16, RGB_DARK_BLUE);    // 'D' key
             set_color_split(15, RGB_DARK_BLUE);    // 'F' key
             set_color_split(11, RGB_DARK_MAGENTA);    // 'C' key
             set_color_split(10, RGB_DARK_MAGENTA);    // 'V' key
 
-            set_color_split(23, RGB_HALF_WHITE);    // 'Q' key
-            set_color_split(22, RGB_HALF_WHITE);    // 'W' key
-            set_color_split(21, RGB_HALF_WHITE);    // 'E' key
-            set_color_split(20, RGB_HALF_WHITE);    // 'R' key
-            set_color_split(19, RGB_HALF_WHITE);    // 'T' key
-            set_color_split(18, RGB_HALF_WHITE);    // 'A' key
-            set_color_split(17, RGB_HALF_WHITE);    // 'S' key
-            set_color_split(14, RGB_HALF_WHITE);    // 'G' key
-            set_color_split(13, RGB_HALF_WHITE);    // 'Z' key
-            set_color_split(12, RGB_HALF_WHITE);    // 'X' key
+            set_color_split(18, RGB_DARK_RED);    // 'A' key - Esc
 
-            set_color_split(9, RGB_DARK_RED);    // 'B' key - Tilde
-
-            break;
-        }
-        case _NUM: {
-            light_up_right_mods_preset();
-
-            const uint8_t numpad_keycodes[] = {12, 11, 10, 17, 16, 15, 22, 21, 20, 7};
-            set_all_keys_colors(numpad_keycodes, sizeof(numpad_keycodes) / sizeof(uint8_t), RGB_DARK_GREEN);
-
-            set_color_split(19, RGB_DARK_CYAN);    // 'T' key - +
-            set_color_split(14, RGB_DARK_CYAN);    // 'G' key - =
-            set_color_split(9, RGB_DARK_CYAN);    // 'B' key - -
+            const uint8_t other_used_keycodes[] = {23, 22, 19, 17, 14, 46, 47, 48, 49, 50, 41, 36, 37, 38, 39, 40};
+            set_all_keys_colors(other_used_keycodes, sizeof(other_used_keycodes) / sizeof(uint8_t), RGB_HALF_WHITE);
 
             break;
         }
@@ -236,46 +294,50 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
             // The row below the arrow keys
             set_color_for_contiguous_keycodes(37, 40, RGB_DARK_YELLOW);
 
-            if (host_keyboard_led_state().caps_lock) {
-                set_color_for_contiguous_keycodes(0, 5, RGB_BRIGHT_ORANGE);
-                set_color_for_contiguous_keycodes(27, 32, RGB_BRIGHT_ORANGE);
-            }
+            // Music controls
+            set_color_split(23, RGB_DARK_CYAN);    // 'Q' key - Prev
+            set_color_split(22, RGB_DARK_ORANGE);    // 'W' key - Vol down
+            set_color_split(21, RGB_DARK_RED);    // 'E' key - Vol up
+            set_color_split(20, RGB_DARK_BLUE);    // 'R' key - Next
 
-            set_color_split(41, RGB_DARK_RED);    // 'H' key - Caps lock
+            set_color_split(14, RGB_DARK_GREEN);    // 'G' key - Play
+            set_color_split(19, RGB_DARK_YELLOW);    // 'T' key - Mute
+            set_color_split(9, RGB_DARK_RED);    // 'B' key - Stop
 
-            set_color_split(50, RGB_DARK_WHITE);    // 'P' key - Undo
-            set_color_split(46, RGB_DARK_WHITE);    // 'Y' key - Redo
-
+            // Cut, copy, paste
             set_color_split(49, RGB_DARK_CYAN);    // 'O' key - Cut
             set_color_split(48, RGB_DARK_BLUE);    // 'I' key - Copy
             set_color_split(47, RGB_DARK_MAGENTA);    // 'U' key - Paste
 
-            break;
-        }
-        case _MEDIA: {
-            set_color_split(42, RGB_DARK_CYAN);    // 'J' key - Prev
-            set_color_split(43, RGB_DARK_ORANGE);    // 'K' key - Vol down
-            set_color_split(44, RGB_DARK_RED);    // 'L' key - Vol up
-            set_color_split(45, RGB_DARK_BLUE);    // ';' key - Next
-
-            // RH thumbs as in 33, 34, 35
-            set_color_split(33, RGB_DARK_RED);    // RH thumb key 1
-            set_color_split(34, RGB_DARK_GREEN);    // RH thumb key 2
-            set_color_split(35, RGB_DARK_YELLOW);    // RH thumb key 3
-
-            break;
-        }
-        case _FUNC: {
-            const uint8_t function_keycodes[] = {12, 11, 10, 17, 16, 15, 22, 21, 20, 13, 18, 23};
-            set_all_keys_colors(function_keycodes, sizeof(function_keycodes) / sizeof(uint8_t), RGB_DARK_GREEN);
-
-            set_color_split(19, RGB_DARK_ORANGE);    // 'T' key - Print Screen
-
+            // Misc
+            set_color_split(41, RGB_DARK_WHITE);    // 'H' key - Tab
+            set_color_split(36, RGB_DARK_RED);    // 'N' key - Caps lock
             // TODO: Could add num lock here similar to caps lock if I start using it.
+            set_color_split(46, RGB_DARK_YELLOW);    // 'Y' key - Print screen
+
             break;
         }
         default:
             break;
+    }
+
+    // Show which modifiers are currently active.
+    if (is_ctrl_held()) {
+        set_color_split(18, RGB_DARK_WHITE);    // 'A' key
+        set_color_split(45, RGB_DARK_WHITE);    // ';' key
+    }
+    if (is_shift_held()) {
+        set_color_split(16, RGB_DARK_WHITE);    // 'D' key
+        set_color_split(43, RGB_DARK_WHITE);    // 'K' key
+        set_color_split(8, RGB_DARK_WHITE);    // RH thumb key 1
+    }
+    if (is_alt_held()) {
+        set_color_split(17, RGB_DARK_WHITE);    // 'S' key
+        set_color_split(44, RGB_DARK_WHITE);    // 'L' key
+    }
+    if (is_gui_held()) {
+        set_color_split(15, RGB_DARK_WHITE);    // 'F' key
+        set_color_split(42, RGB_DARK_WHITE);    // 'J' key
     }
 
     return true;

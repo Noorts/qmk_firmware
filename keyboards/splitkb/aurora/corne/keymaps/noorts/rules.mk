@@ -25,3 +25,6 @@ BACKLIGHT_ENABLE = no # This is per-key backlighting.
 
 RGB_MATRIX_ENABLE = yes
 SPLIT_KEYBOARD = yes
+TRI_LAYER_ENABLE = yes
+
+SRC += oneshot.c
