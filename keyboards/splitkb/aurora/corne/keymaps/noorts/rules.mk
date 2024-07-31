@@ -17,8 +17,11 @@
 #ENCODER_ENABLE = yes
 #OLED_ENABLE = yes
 
+# Note: the comments below seem to be outdated. Regardless, the current setup works.
 # RGB Matrix is enabled at the revision level,
 # while we use the regular RGB underglow for testing
-RGB_MATRIX_ENABLE = no
-RGBLIGHT_ENABLE = yes
-# BACKLIGHT_ENABLE = yes
+RGBLIGHT_ENABLE = no # This is for the underglow lighting (facing away from you).
+BACKLIGHT_ENABLE = no # This is per-key backlighting.
+
+RGB_MATRIX_ENABLE = yes
+SPLIT_KEYBOARD = yes

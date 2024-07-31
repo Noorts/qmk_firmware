@@ -16,6 +16,48 @@
 
 #pragma once
 
-// #define RGBLIGHT_ENABLE
-// #define RGBLED_NUM 42  // Adjust the number of LEDs based on your setup
-// #define RGBLIGHT_ANIMATIONS
+// ** Handedness and RGB settings from https://github.com/Adam13531/qmk_firmware. Thanks Adam! **
+
+/* Select hand configuration */
+#define MASTER_LEFT
+
+// This sends whether or not ctrl, shift, etc. are held to the secondary half of
+// the keyboard. Note that it seems to "break" one half entirely unless BOTH
+// halves have this enabled.
+#define SPLIT_MODS_ENABLE
+
+// Allow the current layer to be synced between the halves.
+#define SPLIT_LAYER_STATE_ENABLE
+
+// Allow the state of caps lock, num lock, etc. to be synced between the halves.
+#define SPLIT_LED_STATE_ENABLE
+#define RGBLED_SPLIT \
+    { 27, 27 }
+
+#define USE_SERIAL_PD2
+
+#ifdef RGBLIGHT_ENABLE
+#    undef RGBLED_NUM
+#    define RGBLIGHT_ANIMATIONS
+#    define RGBLIGHT_SPLIT
+#    define RGBLED_NUM
+#    define RGBLIGHT_LIMIT_VAL 120
+#    define RGBLIGHT_HUE_STEP 10
+#    define RGBLIGHT_SAT_STEP 17
+#    define RGBLIGHT_VAL_STEP 17
+#endif
+
+#ifdef RGB_MATRIX_ENABLE
+#    define RGBLED_NUM 54  // Number of LEDs
+#    define DRIVER_LED_TOTAL RGBLED_NUM
+#    define RGB_MATRIX_SPLIT \
+        { 27, 27 }
+#endif
+
+// ** From https://precondition.github.io/home-row-mods **
+// Configure the global tapping term (default: 200ms)
+#define TAPPING_TERM 200
+
+// Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
+#define QUICK_TAP_TERM 0
+// ****
