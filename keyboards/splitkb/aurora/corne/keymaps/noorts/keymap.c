@@ -233,11 +233,6 @@ bool rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
 
     set_color_for_contiguous_keycodes(0, 53, RGB_OFF);
 
-    if (host_keyboard_led_state().caps_lock) {
-        const uint8_t keycodes_unused[] = {24, 25, 26, 51, 52, 53};
-        set_all_keys_colors(keycodes_unused, sizeof(keycodes_unused) / sizeof(uint8_t), RGB_DARK_ORANGE);
-    }
-
     switch (get_highest_layer(layer_state)) {
         case _BASE: {
             // LH thumbs as in 8, 7, 6

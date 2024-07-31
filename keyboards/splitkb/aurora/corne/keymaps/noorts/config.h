@@ -61,3 +61,8 @@
 // Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
 #define QUICK_TAP_TERM 0
 // ****
+
+// Use the onboard LED for caps lock
+// https://docs.splitkb.com/hc/en-us/articles/5799711553820-Power-LED
+#define LED_CAPS_LOCK_PIN 24
+#define LED_PIN_ON_STATE 0
