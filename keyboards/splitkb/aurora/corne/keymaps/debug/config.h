@@ -16,6 +16,10 @@
 
 #pragma once
 
+// #define RGBLIGHT_ENABLE
+// #define RGBLED_NUM 42  // Adjust the number of LEDs based on your setup
+// #define RGBLIGHT_ANIMATIONS
+
 #ifdef RGBLIGHT_ENABLE
 #   define RGBLIGHT_EFFECT_BREATHING
 #endif
